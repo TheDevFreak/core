@@ -192,6 +192,7 @@ class MetOfficeCurrentData:
         self._datapoint = datapoint
         self._site = site
         self.data = None
+        self.d_data = None
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
@@ -199,6 +200,8 @@ class MetOfficeCurrentData:
         try:
             forecast = self._datapoint.get_forecast_for_site(self._site.id, "3hourly")
             self.data = forecast.now()
+            self.d_data = forecast
         except (ValueError, dp.exceptions.APIException) as err:
             _LOGGER.error("Check Met Office %s", err.args)
             self.data = None
+            self.d_data = None
