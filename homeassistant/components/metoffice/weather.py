@@ -4,7 +4,17 @@ import logging
 import datapoint as dp
 import voluptuous as vol
 
-from homeassistant.components.weather import PLATFORM_SCHEMA, WeatherEntity
+from homeassistant.components.weather import (
+    ATTR_FORECAST_CONDITION,
+    ATTR_FORECAST_PRECIPITATION,
+    ATTR_FORECAST_TEMP,
+    ATTR_FORECAST_TEMP_LOW,
+    ATTR_FORECAST_TIME,
+    ATTR_FORECAST_WIND_BEARING,
+    ATTR_FORECAST_WIND_SPEED,
+    PLATFORM_SCHEMA,
+    WeatherEntity,
+)
 from homeassistant.const import (
     CONF_API_KEY,
     CONF_LATITUDE,
@@ -125,3 +135,33 @@ class MetOfficeWeather(WeatherEntity):
     def attribution(self):
         """Return the attribution."""
         return ATTRIBUTION
+    
+    @property
+    def forecast(self):
+        """Returns forecast array"""
+        conditions = {
+
+        }
+        data = []
+        def get_daily_min_max_temp(day):
+            temperatures = []
+            for step in day.timesteps:
+                temperatures.append(step.temperature.value)
+            return min(temperatures), max(temperatures)
+        def get_day_condition(day):
+            for k, v in CONDITION_CLASSES.items():
+                if day.timesteps[4].weather.value in v:
+                    return(k)
+
+
+        
+        for day in self.data.d_data.days:
+            min_temp, max_temp = get_daily_min_max_temp(day)
+            day = {
+                ATTR_FORECAST_TIME: day.timesteps[0].date.isoformat(),
+                ATTR_FORECAST_TEMP: max_temp,
+                ATTR_FORECAST_TEMP_LOW: min_temp,
+                ATTR_FORECAST_CONDITION: get_day_condition(day)
+            }
+            data.append(day)
+        return data
