@@ -135,33 +135,31 @@ class MetOfficeWeather(WeatherEntity):
     def attribution(self):
         """Return the attribution."""
         return ATTRIBUTION
-    
+
     @property
     def forecast(self):
         """Returns forecast array"""
-        conditions = {
-
-        }
+        conditions = {}
         data = []
+
         def get_daily_min_max_temp(day):
             temperatures = []
             for step in day.timesteps:
                 temperatures.append(step.temperature.value)
             return min(temperatures), max(temperatures)
+
         def get_day_condition(day):
             for k, v in CONDITION_CLASSES.items():
                 if day.timesteps[4].weather.value in v:
-                    return(k)
+                    return k
 
-
-        
         for day in self.data.d_data.days:
             min_temp, max_temp = get_daily_min_max_temp(day)
             day = {
                 ATTR_FORECAST_TIME: day.timesteps[0].date.isoformat(),
                 ATTR_FORECAST_TEMP: max_temp,
                 ATTR_FORECAST_TEMP_LOW: min_temp,
-                ATTR_FORECAST_CONDITION: get_day_condition(day)
+                ATTR_FORECAST_CONDITION: get_day_condition(day),
             }
             data.append(day)
         return data
